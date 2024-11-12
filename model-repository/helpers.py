@@ -103,9 +103,11 @@ class Florence2Processor:
         task_prompt = task_prompt_np.reshape(-1)[0].decode("utf-8")
         image_width, image_heigth = image_size_np.reshape(-1)
 
-        return self.processor.post_process_generation(
+        parsed_text = self.processor.post_process_generation(
             generated_text, task=task_prompt, image_size=(image_width, image_heigth)
         )
+
+        return np.array([parsed_text], dtype=np.object_).reshape(1, -1)
 
 
 class Florence2Model:
