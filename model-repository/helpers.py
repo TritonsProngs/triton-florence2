@@ -151,11 +151,14 @@ class Florence2Model:
             device=self.device, dtype=self.torch_dtype
         )
 
-        return self.model.generate(
-            input_ids=input_ids,
-            pixel_values=pixel_values,
-            max_new_tokens=max_new_tokens,
-            do_sample=do_sample,
-            num_beams=num_beams,
-            **generate_kwargs,
-        )
+        with torch.no_grad():
+            generated_ids = self.model.generate(
+                input_ids=input_ids,
+                pixel_values=pixel_values,
+                max_new_tokens=max_new_tokens,
+                do_sample=do_sample,
+                num_beams=num_beams,
+                **generate_kwargs,
+            )
+
+        return generated_ids
