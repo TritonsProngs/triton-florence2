@@ -87,6 +87,7 @@ class Florence2Processor:
         )
         return (
             inputs["input_ids"],
+            inputs["attention_mask"],
             inputs["pixel_values"],
             image_size,
         )
@@ -132,6 +133,7 @@ class Florence2Model:
         self,
         batch_input_ids: list[np.ndarray],
         batch_pixel_values: list[np.ndarray],
+        batch_attention_mask: list[np.ndarray] = None,
         max_new_tokens: int = 1024,
         do_sample: bool = False,
         num_beams: int = 3,
@@ -150,15 +152,27 @@ class Florence2Model:
         pixel_values = torch.from_numpy(np.vstack(batch_pixel_values)).to(
             device=self.device, dtype=self.torch_dtype
         )
+        # Create batch of attention masks
+        if batch_attention_mask:
+            attention_mask = pad_sequence(
+                [
+                    torch.from_numpy(attn_msk).reshape(-1)
+                    for attn_msk in batch_attention_mask
+                ],
+                batch_first=True,
+                padding_value=0,
+            ).to(device=self.device)
+        else:
+            attention_mask = None
 
-        with torch.no_grad():
-            generated_ids = self.model.generate(
-                input_ids=input_ids,
-                pixel_values=pixel_values,
-                max_new_tokens=max_new_tokens,
-                do_sample=do_sample,
-                num_beams=num_beams,
-                **generate_kwargs,
-            )
+        generated_ids = self.model.generate(
+            input_ids=input_ids,
+            pixel_values=pixel_values,
+            attention_mask=attention_mask,
+            max_new_tokens=max_new_tokens,
+            do_sample=do_sample,
+            num_beams=num_beams,
+            **generate_kwargs,
+        )
 
         return generated_ids
