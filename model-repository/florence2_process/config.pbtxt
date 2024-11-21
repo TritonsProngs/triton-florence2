@@ -1,0 +1,68 @@
+name: "florence2_process"
+backend: "python"
+max_batch_size: 36
+default_model_filename: "florence2_process.py"
+
+input [
+    {
+        name: "INPUT_IMAGE"
+        data_type: TYPE_STRING
+        dims: [1]
+    },
+    {
+        name: "TASK_PROMPT"
+        data_type: TYPE_STRING
+        dims: [1]
+    },
+    {
+        name: "TEXT_PROMPT"
+        data_type: TYPE_STRING
+        dims: [1]
+        optional: true
+    }
+]
+output [
+    {
+        name: "INPUT_IDS"
+        data_type: TYPE_INT64
+        dims: [-1]
+    },
+    {
+        name: "ATTENTION_MASK"
+        data_type: TYPE_INT64
+        dims: [-1]
+    },
+    {
+        name: "PIXEL_VALUES"
+        data_type: TYPE_FP32
+        dims: [3, 768, 768]
+    },
+    {
+        name: "IMAGE_SIZE"
+        data_type: TYPE_INT64
+        dims: [2]
+    }
+]
+
+parameters: [
+    {
+        key: "EXECUTION_ENV_PATH"
+        value: {string_value: "$$TRITON_MODEL_DIRECTORY/florence2_process.tar.gz"}
+    },
+    {
+        key: "model_id_or_dir"
+        value: {
+            string_value: "mrhendrey/Florence-2-large-ft-safetensors"
+        }
+    }
+]
+
+instance_group [
+    {
+        kind: KIND_CPU
+        count: 3
+    }
+]
+
+version_policy: {latest: {num_versions: 1}}
+dynamic_batching: {}
