@@ -39,8 +39,18 @@ class TritonPythonModel:
         """
         self.logger = pb_utils.Logger
         self.model_config = model_config = json.loads(args["model_config"])
-        model_id_or_dir = model_config["parameters"]["model_id_or_dir"]["string_value"]
-        self.processor = Florence2Processor(model_id_or_dir)
+
+        model_cache_dir = os.environ.get(
+            "MODEL_CACHE_DIR", os.path.join(args["model_repository"], "models")
+        )
+        model_subdirectory = self.model_config["parameters"]["model_subfolder"][
+            "string_value"
+        ]
+        self.model_path = os.path.abspath(
+            os.path.join(model_cache_dir, model_subdirectory)
+        )
+
+        self.processor = Florence2Processor(self.model_path)
 
     def error_tensors(self):
         return [
