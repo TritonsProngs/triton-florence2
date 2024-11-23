@@ -21,8 +21,6 @@ class Florence2Processor:
     def convert_np_to_str(self, prompt_np) -> str:
         try:
             prompt = prompt_np.reshape(-1)[0].decode("utf-8")
-        # try:
-        #    prompts = [b.decode("utf-8") for b in prompt_np.reshape(-1)]
         except Exception as exc:
             raise ValueError(f"Failed to convert prompt input to str: {exc}")
         return prompt
@@ -30,11 +28,6 @@ class Florence2Processor:
     def convert_np_to_image(self, image_bytes_np) -> Image:
         try:
             image = Image.open(BytesIO(image_bytes_np.reshape(-1)[0])).convert("RGB")
-        # try:
-        #    images = [
-        #        Image.open(BytesIO(b)).convert("RGB")
-        #        for b in image_bytes_np.reshape(-1)
-        #    ]
         except Exception as exc:
             raise ValueError(f"Failed to convert numpy bytes to PIL.Image: {exc}")
         return image

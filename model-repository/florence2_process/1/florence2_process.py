@@ -38,7 +38,6 @@ class TritonPythonModel:
             Command-line arguments for launching Triton Inference Server
         """
         self.logger = pb_utils.Logger
-        self.logger.log_info(f"CWD={os.getcwd()}")
         self.model_config = model_config = json.loads(args["model_config"])
         model_id_or_dir = model_config["parameters"]["model_id_or_dir"]["string_value"]
         self.processor = Florence2Processor(model_id_or_dir)
