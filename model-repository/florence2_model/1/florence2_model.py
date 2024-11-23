@@ -40,19 +40,8 @@ class TritonPythonModel:
         """
         self.logger = pb_utils.Logger
         self.model_config = model_config = json.loads(args["model_config"])
-        model_id_or_dir = model_config["parameters"]["model_id_or_dir"]["string_value"]
-        self.processor = Florence2Processor(model_id_or_dir)
 
-        if args["model_instance_kind"] == "GPU" and torch.cuda.is_available():
-            device_id = args["model_instance_device_id"]
-            device_id = device_id if device_id else 0
-            self.device = f"cuda:{device_id}"
-            self.torch_dtype = torch.float16
-        else:
-            self.device = "cpu"
-            self.torch_dtype = torch.float32
-
-        """
+        # Get model location
         model_cache_dir = os.environ.get(
             "MODEL_CACHE_DIR", os.path.join(args["model_repository"], "models")
         )
@@ -62,9 +51,20 @@ class TritonPythonModel:
         self.model_path = os.path.abspath(
             os.path.join(model_cache_dir, model_subdirectory)
         )
-        """
-        model_id_or_dir = model_config["parameters"]["model_id_or_dir"]["string_value"]
-        self.model = Florence2Model(model_id_or_dir, self.device, self.torch_dtype)
+
+        # Get GPU/CPU related things
+        if args["model_instance_kind"] == "GPU" and torch.cuda.is_available():
+            device_id = args["model_instance_device_id"]
+            device_id = device_id if device_id else 0
+            self.device = f"cuda:{device_id}"
+            self.torch_dtype = torch.float16
+        else:
+            self.device = "cpu"
+            self.torch_dtype = torch.float32
+
+        # Load the processor & model
+        self.processor = Florence2Processor(self.model_path)
+        self.model = Florence2Model(self.model_path, self.device, self.torch_dtype)
 
     def error_tensors(self):
         error_bytes = json.dumps({"ERROR": "error"}).encode("utf-8")

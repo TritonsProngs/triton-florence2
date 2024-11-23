@@ -50,9 +50,9 @@ parameters: [
         value: {string_value: "$$TRITON_MODEL_DIRECTORY/florence2_process.tar.gz"}
     },
     {
-        key: "model_id_or_dir"
+        key: "model_subfolder"
         value: {
-            string_value: "mrhendrey/Florence-2-large-ft-safetensors"
+            string_value: "models--mrhendrey--Florence-2-large-ft-safetensors/snapshots/9b1cdec1c01073aa0b0a4bdcd5ce0989da38bf95/"
         }
     }
 ]
