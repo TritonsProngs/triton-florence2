@@ -86,7 +86,6 @@ class TritonPythonModel:
                 text_prompt_np = pb_utils.get_input_tensor_by_name(
                     request, "TEXT_PROMPT"
                 )
-                self.logger.log_info(f"text_prompt_np is '{text_prompt_np}'")
                 if text_prompt_np is not None:
                     text_prompt_np = text_prompt_np.as_numpy()
 

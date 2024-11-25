@@ -65,4 +65,4 @@ instance_group [
 ]
 
 version_policy: {latest: {num_versions: 1}}
-dynamic_batching: {}
+dynamic_batching: {max_queue_delay_microseconds: 0}
