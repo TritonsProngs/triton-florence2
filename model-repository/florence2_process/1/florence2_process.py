@@ -8,7 +8,7 @@ import triton_python_backend_utils as pb_utils
 
 try:
     from ...helpers import Florence2Processor
-except:
+except Exception:
     # Terrible Hack to get this to work in Triton Inference Server container
     # Get the absolute path for this file, then back up appropriate number of
     # directories to get to where helpers.py is located
@@ -43,7 +43,7 @@ class TritonPythonModel:
         model_cache_dir = os.environ.get(
             "MODEL_CACHE_DIR", os.path.join(args["model_repository"], "models")
         )
-        model_subdirectory = self.model_config["parameters"]["model_subfolder"][
+        model_subdirectory = model_config["parameters"]["model_subfolder"][
             "string_value"
         ]
         self.model_path = os.path.abspath(
