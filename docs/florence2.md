@@ -138,3 +138,33 @@ with ThreadPoolExecutor(max_workers=4) as executor:
 ```
 
 ## Performance Analysis
+The throughput performance is highly task dependent with some tasks taking much longer
+than others. The ones that have regions (OD, OCR_WITH_REGION, etc.) can take
+significantly longer depending on the number of objects in the image.
+
+I use the following image during performance testing. As you can see, it has a lot of objects which will greatly affect throughput on tasks that get regions.
+![Bike Protest](../data/July_30_Bike_Protest_crowd_-_safe_streets_now.jpg)
+
+There is some sample data in [data/](../data/) directory. 
+
+```
+sdk-container:/workspace perf_analyzer \
+    -m florence2 \
+    -v \
+    --input-data data/load_data_CAPTION.json \
+    --measurement-mode time_windows \
+    --measurement-interval 20000 \
+    --concurrency-range 30
+```
+
+| Task | Concurrency | Throughput (infer/s) | Ave. Latency (s) |
+| ---- | ----------- | -------------------- | ------------ |
+| \<CAPTION> | 30 | 25.7 | 1.16 |
+| \<DETAILED_CAPTION> | 30 | 14.2| 2.14 |
+| \<MORE_DETAILED_CAPTION> | 30 | 17.6 | 1.67 |
+| \<CAPTION_TO_PHRASE_GROUNDING> | 30 | 28.7 | 1.03 |
+| \<OD> | 20 | 5.0 | 3.83 |
+| \<DENSE_REGION_CAPTION> | 30 | 7.5 | 3.91 |
+| \<REGION_PROPOSAL> | 30 | 6.3 | 4.71 |
+| \<OCR> | 30 | 28.2 | 1.05 |
+| \<OCR_WITH_REGION> | 30 | 21.0 | 1.40 |
