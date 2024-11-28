@@ -151,10 +151,10 @@ There is some sample data in [data/](../data/) directory.
 sdk-container:/workspace perf_analyzer \
     -m florence2 \
     -v \
-    --input-data data/load_data_CAPTION.json \
     --measurement-mode time_windows \
     --measurement-interval 20000 \
-    --concurrency-range 30
+    --concurrency-range 30 \
+    --input-data data/load_data_CAPTION.json
 ```
 
 | Task | Concurrency | Throughput (infer/s) | Ave. Latency (s) |
