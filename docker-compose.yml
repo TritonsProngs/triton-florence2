@@ -29,7 +29,7 @@ x-base_inference_service: &base_inference_service
     - 8001:8001
     - 8002:8002
   restart: "no"
-  shm_size: "1gb"
+  shm_size: "2gb"
   volumes:
     - ${MODEL_REPOSITORY_SOURCE:-./model-repository}:${MODEL_REPOSITORY_TARGET:-/model-repository}:z
     - ${HF_HUB_CACHE_SOURCE:-./models}:${HF_HUB_CACHE_TARGET:-/models}:z

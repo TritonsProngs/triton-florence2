@@ -2,15 +2,15 @@
 This is an ensemble deployment of the [Florence-2-large-ft](https://huggingface.co/mrhendrey/Florence-2-large-ft-safetensors) model. This is a vision model that has
 been finetuned for the following task prompts:
 
-* "<CAPTION>"
+* "\<CAPTION>"
 * "<DETAILED_CAPTION>"
 * "<MORE_DETAILED_CAPTION>"
 * "<CAPTION_TO_PHRASE_GROUNDING>"
   * This takes an additional text prompt to do the grounding, e.g., "A cyclist holding a sign"
-* "<OD>" (Object Detection)
+* "\<OD>" (Object Detection)
 * "<DENSE_REGION_CAPTION>"
 * "<REGION_PROPOSAL>"
-* "<OCR>"
+* "\<OCR>"
 * "<OCR_WITH_REGION>"
 
 The output returned will be a JSON string that depends upon the task prompt given.
@@ -147,24 +147,35 @@ I use the following image during performance testing. As you can see, it has a l
 
 There is some sample data in [data/](../data/) directory. 
 
+Launch the Triton Inference Server SDK container 
+
+```sh
+docker run \
+  --rm -it --net host \
+  -v ./:/workspace/triton-florence2 \
+  nvcr.io/nvidia/tritonserver:24.10-py3-sdk
 ```
+
+Inside the container, run the perf_analyzer CLI
+
+```sh
 sdk-container:/workspace perf_analyzer \
     -m florence2 \
     -v \
     --measurement-mode time_windows \
     --measurement-interval 20000 \
     --concurrency-range 30 \
-    --input-data data/load_data_CAPTION.json
+    --input-data triton-florence2/data/load_data_CAPTION.json
 ```
 
 | Task | Concurrency | Throughput (infer/s) | Ave. Latency (s) |
 | ---- | ----------- | -------------------- | ------------ |
-| \<CAPTION> | 30 | 25.7 | 1.16 |
-| \<DETAILED_CAPTION> | 30 | 14.2| 2.14 |
-| \<MORE_DETAILED_CAPTION> | 30 | 17.6 | 1.67 |
-| \<CAPTION_TO_PHRASE_GROUNDING> | 30 | 28.7 | 1.03 |
-| \<OD> | 20 | 5.0 | 3.83 |
-| \<DENSE_REGION_CAPTION> | 30 | 7.5 | 3.91 |
-| \<REGION_PROPOSAL> | 30 | 6.3 | 4.71 |
-| \<OCR> | 30 | 28.2 | 1.05 |
-| \<OCR_WITH_REGION> | 30 | 21.0 | 1.40 |
+| \<CAPTION> | 30 | 25.9 | 1.15 |
+| \<DETAILED_CAPTION> | 30 | 13.8 | 2.13 |
+| \<MORE_DETAILED_CAPTION> | 30 | 19.2 | 1.59 |
+| \<CAPTION_TO_PHRASE_GROUNDING> | 30 | 29.7 | 1.01 |
+| \<OD> | 20 | 5.0 | 3.84 |
+| \<DENSE_REGION_CAPTION> | 30 | 7.5 | 4.02 |
+| \<REGION_PROPOSAL> | 30 | 6.3 | 4.72 |
+| \<OCR> | 30 | 29.3 | 1.02 |
+| \<OCR_WITH_REGION> | 30 | 21.3 | 1.39 |
