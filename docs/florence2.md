@@ -2,15 +2,26 @@
 This is an ensemble deployment of the [Florence-2-large-ft](https://huggingface.co/mrhendrey/Florence-2-large-ft-safetensors) model. This is a vision model that has
 been finetuned for the following task prompts:
 
+<<<<<<< HEAD
 * "\<CAPTION>"
+=======
+* "<CAPTION>"
+>>>>>>> 1b235777c6019b82c956b39b0dc6dfab36afbbcd
 * "<DETAILED_CAPTION>"
 * "<MORE_DETAILED_CAPTION>"
 * "<CAPTION_TO_PHRASE_GROUNDING>"
   * This takes an additional text prompt to do the grounding, e.g., "A cyclist holding a sign"
+<<<<<<< HEAD
 * "\<OD>" (Object Detection)
 * "<DENSE_REGION_CAPTION>"
 * "<REGION_PROPOSAL>"
 * "\<OCR>"
+=======
+* "<OD>" (Object Detection)
+* "<DENSE_REGION_CAPTION>"
+* "<REGION_PROPOSAL>"
+* "<OCR>"
+>>>>>>> 1b235777c6019b82c956b39b0dc6dfab36afbbcd
 * "<OCR_WITH_REGION>"
 
 The output returned will be a JSON string that depends upon the task prompt given.
