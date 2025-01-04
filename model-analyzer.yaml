@@ -25,7 +25,7 @@ profile_models:
         max_queue_delay_microseconds: [0, 100, 200]
       instance_group:
         - kind: KIND_GPU
-          count: [1, 2]
+          count: [1]
   florence2_process:
     perf_analyzer_flags:
       input-data: ./triton-florence2/data/load_data_MORE_DETAILED_CAPTION.json

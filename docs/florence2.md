@@ -137,6 +137,85 @@ with ThreadPoolExecutor(max_workers=4) as executor:
 
 ```
 
+## Model Analyzer
+Included in the Triton Inference Server SDK container is the model-analyzer CLI. This
+uses the perf_analyzer to help you find optimal configurations to maximize for your
+GPU.
+
+This is my first foray into using this utility and some difficulty getting it to work
+well with an ensemble configuration like we are using in this model repository.
+
+### Model Analyzer on florence2_model and florence2_process
+Let's start with getting configurations optimized for the two underlying key components
+of the ensemble, namely, florence2_model (GPU workload) and florence2_process (CPU workload).
+These will be done using the same [yaml script](../model-analyzer-both.yaml).
+
+For now, I'm using triton remotely which means that you need to have the service up and
+running for model-analyzer to see. There are two other options, local & docker, but
+I couldn't get those to work for now.  Pressing on!
+
+Start the SDK container by running:
+
+```sh
+docker run --rm -it --net host \
+  -v ./:/workspace/triton-florence2 \
+  nvcr.io/nvidia/tritonserver:24.10-py3-sdk
+```
+
+Once inside the SDK container you can start the model-analyzer with:
+
+```sh
+model-analyzer profile \
+  --model-repository triton-florence2/model-repository/ \
+  --triton-launch-mode=remote \
+  --output-model-repository-path triton-florence2/model-analyzer-output/brute_both \
+  -f triton-florence2/model-analyzer-both.yaml
+```
+
+Take a look at the [model-analyzer-both.yaml](../model-analyzer-both.yaml). This will use
+a brute force search across the following combinations of configurations
+
+* florence2_process (36 total configurations)
+  * max_batch_size: [6, 12, 24, 36]
+  * max_queue_delay_microseconds: [0, 100, 200]
+  * instance counts: [2, 3, 4]
+* florence2_model (12 total configurations)
+  * max_batch_size: [6, 12, 24, 36]
+  * max_queue_delay_microseconds: [0, 100, 200]
+
+When the model-analyzer is finished, it generates both a detailed and summary reports for the top configurations that it found. The [PDF reports](../model-analyzer-reports/) have been copied into the repo for convenience.
+
+### Results for GPU Workload
+The top three results had the following throughput for the different levels of concurrency [12:60:12].
+
+![Top 3 Configs for GPU Workload](../model-analyzer-reports/plots/florence2_model_latency.png)
+
+| Configuration | Throughput | max_batch_size | max_queue_delay_microseconds |
+|--------------:|:----------:|:--------------:|:----------------------------:|
+| **config_default**  | **20.4761**|    **36**      |             **0**            |
+| config_11     | 20.2189    |      36        |              200             |
+| config_3      | 20.2184    |      36        |               0              |
+| config_7      | 20.2180    |      36        |              100             |
+| config_2      | 19.7727    |      24        |               0              |
+
+### Results for CPU Workload
+The top three results had the following throughput for the different levels of concurrency [12:60:12].
+
+![Top 3 Configs for CPU Workload](../model-analyzer-reports/plots/florence2_process_latency.png)
+
+| Configuration  | Throughput  | max_batch_size | max_queue_delay_microseconds | Instance Count |
+|---------------:|:-----------:|:--------------:|:----------------------------:|:--------------:|
+| config_22      | 165.025     |      24        |            100               |      4         |
+| config_10      | 164.992     |      24        |             0                |      4         |
+| config_21      | 164.708     |      12        |            100               |      4         | 
+| config_32      | 164.488     |       6        |            200               |      4         |
+| config_default | 162.862     |      36        |             0                |      4         |
+
+
+
+### Config Selection
+When using the ensemble backend, the batch size must match each other. Given that there is very little difference on the CPU workload (as expected), we will set the configuration of florence2_model to match that of config_default.
+
 ## Performance Analysis
 The throughput performance is highly task dependent with some tasks taking much longer
 than others. The ones that have regions (OD, OCR_WITH_REGION, etc.) can take
@@ -159,26 +238,26 @@ docker run \
 Inside the container, run the perf_analyzer CLI
 
 ```sh
-sdk-container:/workspace perf_analyzer \
+perf_analyzer \
     -m florence2 \
     -v \
     --measurement-mode time_windows \
-    --measurement-interval 20000 \
-    --concurrency-range 30 \
+    --measurement-interval 60000 \
+    --concurrency-range 36 \
     --input-data triton-florence2/data/load_data_CAPTION.json
 ```
 
 | Task | Concurrency | Throughput (infer/s) | Ave. Latency (s) |
 | ---- | ----------- | -------------------- | ------------ |
-| \<CAPTION> | 30 | 25.9 | 1.15 |
-| \<DETAILED_CAPTION> | 30 | 13.8 | 2.13 |
-| \<MORE_DETAILED_CAPTION> | 30 | 19.2 | 1.59 |
-| \<CAPTION_TO_PHRASE_GROUNDING> | 30 | 29.7 | 1.01 |
-| \<OD> | 20 | 5.0 | 3.84 |
-| \<DENSE_REGION_CAPTION> | 30 | 7.5 | 4.02 |
-| \<REGION_PROPOSAL> | 30 | 6.3 | 4.72 |
-| \<OCR> | 30 | 29.3 | 1.02 |
-| \<OCR_WITH_REGION> | 30 | 21.3 | 1.39 |
+| \<CAPTION> | 36 | 26.6 | 1.35 |
+| \<DETAILED_CAPTION> | 36 | 14.5 | 2.45 |
+| \<MORE_DETAILED_CAPTION> | 36 | 19.6 | 1.83 |
+| \<CAPTION_TO_PHRASE_GROUNDING> | 36 | 29.7 | 1.21 |
+| \<OD> | 36 | 5.8 | 6.13 |
+| \<DENSE_REGION_CAPTION> | 36 | 7.3 | 4.90 |
+| \<REGION_PROPOSAL> | 36 | 6.3 | 4.72 |
+| \<OCR> | 36 | 29.4 | 1.22 |
+| \<OCR_WITH_REGION> | 36 | 21.6 | 1.66 |
 
 ## Validation
 To validate this implementatin of the Florence-2 model, we calculate a few metrics that
