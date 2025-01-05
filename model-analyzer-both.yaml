@@ -1,0 +1,41 @@
+model_repository: ./
+
+run_config_search_mode: brute
+export_path: ./triton-florence2/model-analyzer-both-reports
+num_configs_per_model: 5
+
+profile_models:
+  florence2_process:
+    perf_analyzer_flags:
+      input-data: ./triton-florence2/data/load_data_MORE_DETAILED_CAPTION.json
+      measurement-mode: time_windows
+      measurement-interval: 5000
+    parameters:
+      concurrency:
+        start: 12
+        stop: 60
+        step: 12
+    model_config_parameters:
+      max_batch_size: [6, 12, 24, 36]
+      dynamic_batching:
+        max_queue_delay_microseconds: [0, 100, 200]
+      instance_group:
+        - kind: KIND_CPU
+          count: [2, 3, 4]
+  florence2_model:
+    perf_analyzer_flags:
+      input-data: ./triton-florence2/data/load_data_model_MORE_DETAILED_CAPTION.json
+      measurement-mode: time_windows
+      measurement-interval: 15000
+    parameters:
+      concurrency:
+        start: 12
+        stop: 60
+        step: 12
+    model_config_parameters:
+      max_batch_size: [6, 12, 24, 36]
+      dynamic_batching:
+        max_queue_delay_microseconds: [0, 100, 200]
+      instance_group:
+        - kind: KIND_GPU
+          count: [1]

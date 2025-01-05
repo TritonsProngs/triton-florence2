@@ -1,0 +1,16 @@
+model_repository: ./
+
+run_config_search_mode: quick
+run_config_search_min_model_batch_size: 6
+run_config_search_max_model_batch_size: 36
+run_config_search_min_concurrency: 12
+run_config_search_max_concurrency: 60
+export_path: ./triton-florence2/model-analyzer-ensemble-reports
+num_configs_per_model: 5
+
+profile_models:
+  florence2:
+    perf_analyzer_flags:
+      input-data: ./triton-florence2/data/load_data_MORE_DETAILED_CAPTION.json
+      measurement-mode: time_windows
+      measurement-interval: 15000
